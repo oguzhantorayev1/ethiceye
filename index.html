@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <!-- Adjust viewport for scaling within Storyline -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            Global Ethics & Compliance Quiz: Navigating Corruption for Uber
+        </title>
+        <style>
+            /* Reset and base styles */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                height: 100%;
+                background-color: #1a1a1a;
+                color: #e0e0e0;
+            }
+            /* Main container */
+            #container {
+                display: flex;
+                flex-direction: row;
+                height: 100%;
+                overflow: hidden;
+            }
+            /* Quiz container */
+            #quiz-container {
+                background-color: rgba(42, 42, 42, 0.9);
+                padding: 2%;
+                flex: 1 1 60%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            /* Newsflash and globe container */
+            #newsflash-and-globe {
+                flex: 1 1 40%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* Globe container */
+            #globe-container {
+                position: relative;
+                flex: 1.3;
+                overflow: hidden;
+            }
+            #particles-js,
+            #globe {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+            }
+            #hologram-base {
+                width: 50%;
+                height: 15px;
+                background: radial-gradient(
+                    ellipse at center,
+                    #007bff 0%,
+                    transparent 70%
+                );
+                position: absolute;
+                bottom: 5%;
+                left: 50%;
+                transform: translateX(-50%);
+                filter: blur(5px);
+                opacity: 0.7;
+                pointer-events: none;
+            }
+
+            /* Quiz content */
+            h1,
+            h2 {
+                color: #007bff;
+                margin-bottom: 1em;
+                font-size: 2vw;
+                flex-shrink: 0;
+            }
+            #progress {
+                margin-bottom: 1em;
+                font-size: 1vw;
+                color: #888;
+                flex-shrink: 0;
+            }
+            #quiz-content {
+                flex: 1;
+                overflow-y: auto;
+                padding-right: 10px;
+            }
+            #country {
+                color: #ffc107;
+                font-size: 1.5vw;
+                margin-bottom: 1em;
+            }
+            #scenario,
+            #question {
+                margin-bottom: 1em;
+                font-size: 1.2vw;
+            }
+            #choices {
+                margin-bottom: 1em;
+            }
+            #choices button {
+                margin: 0.5em 0;
+                padding: 0.75em 1em;
+                font-size: 1.2vw;
+                cursor: pointer;
+                background-color: #3a3a3a;
+                color: #e0e0e0;
+                border: none;
+                border-radius: 5px;
+                transition: all 0.3s ease;
+                width: 100%;
+                text-align: left;
+            }
+            #choices button:hover {
+                background-color: #4a4a4a;
+            }
+            #choices button.correct {
+                background-color: #28a745;
+                color: white;
+            }
+            #choices button.incorrect {
+                background-color: #dc3545;
+                color: white;
+            }
+            #next-btn {
+                background-color: #007bff;
+                color: white;
+                font-weight: bold;
+                text-align: center;
+                padding: 0.75em 1em;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-top: 1em;
+                flex-shrink: 0;
+                font-size: 1.2vw;
+            }
+            #next-btn:hover {
+                background-color: #0056b3;
+            }
+            #result {
+                font-weight: bold;
+                margin-top: 1em;
+                padding: 0.5em;
+                border-radius: 5px;
+                font-size: 1.2vw;
+            }
+
+            /* Modal overlay for Newsflash */
+            #newsflash-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: none; /* hidden by default */
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+            #newsflash {
+                background-color: #3a3a3a;
+                border-left: 5px solid #ffc107;
+                padding: 2em;
+                border-radius: 5px;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80%;
+                overflow-y: auto;
+                position: relative;
+            }
+            #newsflash h3 {
+                font-size: 1.5vw;
+                margin-bottom: 0.5em;
+                color: #ffc107;
+            }
+            #newsflash p {
+                font-size: 1.2vw;
+                margin-bottom: 0.5em;
+            }
+            #newsflash .source {
+                font-size: 1vw;
+                color: #888;
+            }
+            #newsflash .close-btn {
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                background: none;
+                border: none;
+                color: #e0e0e0;
+                font-size: 1.5vw;
+                cursor: pointer;
+            }
+            #newsflash .close-btn:hover {
+                color: #ffffff;
+            }
+
+            /* Custom scrollbar styles */
+            #quiz-content::-webkit-scrollbar,
+            #newsflash::-webkit-scrollbar {
+                width: 6px;
+            }
+            #quiz-content::-webkit-scrollbar-track,
+            #newsflash::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            #quiz-content::-webkit-scrollbar-thumb,
+            #newsflash::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+            }
+            #quiz-content::-webkit-scrollbar-thumb:hover,
+            #newsflash::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+
+            #quiz-content,
+            #newsflash {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+            }
+            #quiz-content:hover,
+            #newsflash:hover {
+                scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 800px) {
+                #container {
+                    flex-direction: column;
+                }
+                #quiz-container {
+                    flex: 1;
+                    padding: 5%;
+                }
+                #newsflash-and-globe {
+                    flex: 1;
+                }
+                #quiz-container,
+                #newsflash-and-globe {
+                    width: 100%;
+                    height: 50%;
+                }
+                h1,
+                h2 {
+                    font-size: 4vw;
+                }
+                #progress,
+                #country,
+                #scenario,
+                #question,
+                #choices button,
+                #next-btn,
+                #result,
+                #newsflash h3,
+                #newsflash p {
+                    font-size: 3vw;
+                }
+                #quiz-content {
+                    padding-right: 5px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="quiz-container">
+                <h1>Global Ethics & Compliance Quiz</h1>
+                <h2>Navigating Corruption for Uber</h2>
+                <div id="progress"></div>
+                <div id="quiz-content">
+                    <h3 id="country"></h3>
+                    <p id="scenario"></p>
+                    <p id="question"></p>
+                    <div id="choices"></div>
+                    <p id="result"></p>
+                </div>
+                <button id="next-btn">Next Question</button>
+            </div>
+            <div id="newsflash-and-globe">
+                <div id="globe-container">
+                    <div id="particles-js"></div>
+                    <div id="globe"></div>
+                    <div id="hologram-base"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Newsflash -->
+        <div id="newsflash-modal">
+            <div id="newsflash">
+                <!-- Content populated via JS -->
+                <button class="close-btn">✖</button>
+            </div>
+        </div>
+
+        <!-- Load scripts with defer to prevent blocking rendering -->
+        <script src="https://d3js.org/d3.v5.min.js" defer></script>
+        <script src="https://d3js.org/d3-geo.v1.min.js" defer></script>
+        <script src="https://d3js.org/topojson.v3.min.js" defer></script>
+        <script
+            src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"
+            defer
+        ></script>
+        <script>
+            // Global variables
+            let quizData = [];
+            let currentQuestion = 0;
+            let answerSelected = false;
+            let countries;
+            let projection, path, svg;
+
+            // Initialize total correct and incorrect counters
+            let totalCorrect = 0;
+            let totalIncorrect = 0;
+
+            // Function to get query parameters
+            function getQueryParam(param) {
+                var urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param);
+            }
+
+            // Get the Region from the URL
+            var region = getQueryParam("region");
+            console.log("Region from URL:", region);
+
+            window.addEventListener("load", () => {
+                if (region) {
+                    fetchQuizData();
+                } else {
+                    console.error("Region parameter is missing in the URL.");
+                    // Optionally, display an error message to the user
+                    document.getElementById("quiz-container").innerHTML = `
+                    <h1>Error</h1>
+                    <p>The region parameter is missing. Please access this quiz through the correct link.</p>
+                `;
+                }
+            });
+
+            document
+                .getElementById("next-btn")
+                .addEventListener("click", () => {
+                    currentQuestion++;
+                    if (currentQuestion < quizData.length) {
+                        showQuestion();
+                    } else {
+                        // Update quiz-container content
+                        document.getElementById("quiz-container").innerHTML = `
+                    <div class="quiz-completed">
+                        <h1>Quiz Completed!</h1>
+                        <p>You've successfully navigated challenging scenarios in different countries. Always prioritize transparency, follow company guidelines, and seek guidance when needed. Your commitment to ethics helps build a fair and sustainable global ride-sharing ecosystem. Well done!</p>
+                    </div>
+                    `;
+                        // Update newsflash to show total score
+                        document.getElementById("newsflash").innerHTML = `
+                    <h3>Your Score</h3>
+                    <p>You answered ${totalCorrect} out of ${quizData.length} questions correctly.</p>
+                    `;
+                        // Send game completion signal to Storyline after quiz completion
+                        sendCompletionSignalToStoryline();
+                    }
+                });
+
+            // Close button for Newsflash Modal
+            document
+                .querySelector("#newsflash .close-btn")
+                .addEventListener("click", () => {
+                    hideNewsflashModal();
+                });
+
+            // Function to send completion signal
+            function sendCompletionSignalToStoryline() {
+                const message = {
+                    status: "completed",
+                    totalCorrect: totalCorrect,
+                    totalIncorrect: totalIncorrect,
+                };
+                window.parent.postMessage(message, "*");
+            }
+
+            async function fetchQuizData() {
+                if (!region) {
+                    console.error("Region is not set. Cannot fetch quiz data.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(
+                        `/getQuizData?region=${encodeURIComponent(region)}`,
+                    );
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.statusText}`);
+                    }
+                    quizData = await response.json();
+
+                    if (quizData.length === 0) {
+                        console.error("Quiz data is empty.");
+                        return;
+                    }
+
+                    // Initialize the globe
+                    initGlobe();
+
+                    shuffleArray(quizData);
+                    showQuestion();
+                } catch (error) {
+                    console.error("Error fetching quiz data:", error);
+                }
+            }
+
+            function initGlobe() {
+                const container = document.getElementById("globe-container");
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                const sensitivity = 75;
+
+                projection = d3
+                    .geoOrthographic()
+                    .scale(Math.min(width, height) / 2 - 10)
+                    .center([0, 0])
+                    .rotate([0, 0, 0])
+                    .translate([width / 2, height / 2]);
+
+                const initialScale = projection.scale();
+                path = d3.geoPath().projection(projection);
+
+                svg = d3
+                    .select("#globe")
+                    .append("svg")
+                    .attr("width", "100%")
+                    .attr("height", "100%")
+                    .attr("viewBox", `0 0 ${width} ${height}`)
+                    .attr("preserveAspectRatio", "xMidYMid meet");
+
+                let globe = svg
+                    .append("circle")
+                    .attr("fill", "#1c1c1c")
+                    .attr("stroke", "#007bff")
+                    .attr("stroke-width", "0.2")
+                    .attr("cx", width / 2)
+                    .attr("cy", height / 2)
+                    .attr("r", initialScale);
+
+                svg.call(
+                    d3.drag().on("drag", () => {
+                        const rotate = projection.rotate();
+                        const k = sensitivity / projection.scale();
+                        projection.rotate([
+                            rotate[0] + d3.event.dx * k,
+                            rotate[1] - d3.event.dy * k,
+                        ]);
+                        path = d3.geoPath().projection(projection);
+                        svg.selectAll("path").attr("d", path);
+                    }),
+                ).call(
+                    d3.zoom().on("zoom", () => {
+                        if (d3.event.transform.k > 0.3) {
+                            projection.scale(
+                                initialScale * d3.event.transform.k,
+                            );
+                            path = d3.geoPath().projection(projection);
+                            svg.selectAll("path").attr("d", path);
+                            globe.attr("r", projection.scale());
+                        } else {
+                            d3.event.transform.k = 0.3;
+                        }
+                    }),
+                );
+
+                let map = svg.append("g");
+
+                d3.json(
+                    "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
+                ).then(function (data) {
+                    countries = topojson.feature(
+                        data,
+                        data.objects.countries,
+                    ).features;
+
+                    map.selectAll("path")
+                        .data(countries)
+                        .enter()
+                        .append("path")
+                        .attr("class", "country")
+                        .attr("d", path)
+                        .attr("fill", function (d) {
+                            const quizCountry = quizData.find(
+                                (quiz) =>
+                                    normalizeCountryName(quiz.country) ===
+                                    normalizeCountryName(d.properties.name),
+                            );
+                            return quizCountry ? "#ffcc00" : "#4a4a4a";
+                        })
+                        .attr("stroke", "#1a1a1a")
+                        .attr("stroke-width", 0.5);
+                });
+
+                // Particle.js configuration remains the same
+                particlesJS("particles-js", {
+                    particles: {
+                        number: {
+                            value: 80,
+                            density: {
+                                enable: true,
+                                value_area: 800,
+                            },
+                        },
+                        color: {
+                            value: "#007bff",
+                        },
+                        shape: {
+                            type: "circle",
+                            stroke: {
+                                width: 0,
+                                color: "#000000",
+                            },
+                            polygon: {
+                                nb_sides: 5,
+                            },
+                        },
+                        opacity: {
+                            value: 0.5,
+                            random: false,
+                            anim: {
+                                enable: false,
+                                speed: 1,
+                                opacity_min: 0.1,
+                                sync: false,
+                            },
+                        },
+                        size: {
+                            value: 3,
+                            random: true,
+                            anim: {
+                                enable: false,
+                                speed: 40,
+                                size_min: 0.1,
+                                sync: false,
+                            },
+                        },
+                        line_linked: {
+                            enable: true,
+                            distance: 150,
+                            color: "#007bff",
+                            opacity: 0.4,
+                            width: 1,
+                        },
+                        move: {
+                            enable: true,
+                            speed: 2,
+                            direction: "none",
+                            random: false,
+                            straight: false,
+                            out_mode: "out",
+                            bounce: false,
+                            attract: {
+                                enable: false,
+                                rotateX: 600,
+                                rotateY: 1200,
+                            },
+                        },
+                    },
+                    interactivity: {
+                        detect_on: "canvas",
+                        events: {
+                            onhover: {
+                                enable: true,
+                                mode: "repulse",
+                            },
+                            onclick: {
+                                enable: true,
+                                mode: "push",
+                            },
+                            resize: true,
+                        },
+                        modes: {
+                            grab: {
+                                distance: 400,
+                                line_linked: {
+                                    opacity: 1,
+                                },
+                            },
+                            bubble: {
+                                distance: 400,
+                                size: 40,
+                                duration: 2,
+                                opacity: 8,
+                                speed: 3,
+                            },
+                            repulse: {
+                                distance: 200,
+                                duration: 0.4,
+                            },
+                            push: {
+                                particles_nb: 4,
+                            },
+                            remove: {
+                                particles_nb: 2,
+                            },
+                        },
+                    },
+                    retina_detect: true,
+                });
+            }
+
+            // Ensure the globe resizes when the window or container size changes
+            window.addEventListener("resize", () => {
+                // Remove the existing globe SVG
+                d3.select("#globe svg").remove();
+                // Reinitialize the globe
+                initGlobe();
+            });
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function showQuestion() {
+                answerSelected = false;
+
+                if (
+                    !quizData[currentQuestion] ||
+                    !quizData[currentQuestion].country
+                ) {
+                    console.error(
+                        "Invalid quiz data at index " + currentQuestion,
+                    );
+                    return;
+                }
+
+                const quiz = quizData[currentQuestion];
+                document.getElementById("country").textContent = quiz.country;
+                document.getElementById("scenario").textContent = quiz.scenario;
+                document.getElementById("question").textContent = quiz.question;
+
+                const choicesContainer = document.getElementById("choices");
+                choicesContainer.innerHTML = "";
+                quiz.choices.forEach((choice, index) => {
+                    const button = document.createElement("button");
+                    button.textContent = choice;
+                    button.onclick = () => selectAnswer(index);
+                    choicesContainer.appendChild(button);
+                });
+
+                document.getElementById("result").textContent = "";
+                document.getElementById("next-btn").style.display = "none";
+                updateProgress();
+
+                // Show the newsflash as a modal before allowing the user to continue
+                showNewsflash(quiz.newsflash, quiz.source);
+
+                const lat = quiz.lat;
+                const lon = quiz.lon;
+
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    focusOnCoordinates(lat, lon);
+                }
+            }
+
+            function selectAnswer(index) {
+                if (answerSelected) return;
+
+                answerSelected = true;
+                const quiz = quizData[currentQuestion];
+                const buttons = document.querySelectorAll("#choices button");
+                const resultElement = document.getElementById("result");
+
+                buttons.forEach((button, i) => {
+                    if (i === index) {
+                        button.classList.add(
+                            i === quiz.correct ? "correct" : "incorrect",
+                        );
+                    }
+                });
+
+                if (index === quiz.correct) {
+                    totalCorrect++;
+                    resultElement.textContent = "Correct! Well done.";
+                    resultElement.style.color = "#28a745";
+                } else {
+                    totalIncorrect++;
+                    resultElement.textContent = "Incorrect.";
+                    resultElement.style.color = "#dc3545";
+                }
+                document.getElementById("next-btn").style.display = "block";
+            }
+
+            function updateProgress() {
+                document.getElementById("progress").textContent =
+                    `Question ${currentQuestion + 1} of ${quizData.length}`;
+            }
+
+            function showNewsflash(newsContent, source) {
+                const newsflashElement = document.getElementById("newsflash");
+                newsflashElement.innerHTML = `
+                    <button class="close-btn">✖</button>
+                    <h3>Breaking News</h3>
+                    <p>${newsContent}</p>
+                    <p class="source">Source: ${source}</p>
+                `;
+                // Re-attach close event handler since we replaced the innerHTML
+                newsflashElement
+                    .querySelector(".close-btn")
+                    .addEventListener("click", hideNewsflashModal);
+
+                // Show the modal
+                document.getElementById("newsflash-modal").style.display =
+                    "flex";
+            }
+
+            function hideNewsflashModal() {
+                document.getElementById("newsflash-modal").style.display =
+                    "none";
+            }
+
+            function focusOnCoordinates(lat, lon) {
+                // Ensure lat is between -90 and 90, lon between -180 and 180
+                lat = Math.max(-90, Math.min(90, lat));
+                lon = ((lon + 180) % 360) - 180;
+
+                const rotation = projection.rotate();
+                const targetRotation = [-lon, -lat, rotation[2]];
+
+                d3.transition()
+                    .duration(1000)
+                    .tween("rotate", () => {
+                        const r = d3.interpolate(rotation, targetRotation);
+                        return (t) => {
+                            projection.rotate(r(t));
+                            svg.selectAll("path").attr("d", path);
+                        };
+                    });
+            }
+
+            function normalizeCountryName(name) {
+                return name.toLowerCase().replace(/[^a-z]/g, "");
+            }
+        </script>
+    </body>
+</html>

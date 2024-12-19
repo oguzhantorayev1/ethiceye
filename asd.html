@@ -1,0 +1,607 @@
+<html><head><base href="https://websim-creation-engine.example.com/interactive-population-globe-with-cpi-colors/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Ethics & Compliance Quiz: Navigating Corruption for Uber</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        display: flex;
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+    #quiz-container {
+        flex: 2;
+        padding: 30px;
+        overflow-y: auto;
+        background-color: #2a2a2a;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    #globe-container {
+        flex: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #1a1a1a;
+    }
+    #question, #choices {
+        margin-bottom: 30px;
+    }
+    button {
+        margin: 10px 0;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #3a3a3a;
+        color: #e0e0e0;
+        border: none;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        width: 100%;
+        text-align: left;
+    }
+    button:hover {
+        background-color: #4a4a4a;
+    }
+    button.selected {
+        background-color: #007bff;
+        color: white;
+    }
+    button.correct {
+        background-color: #28a745;
+        color: white;
+    }
+    button.incorrect {
+        background-color: #dc3545;
+        color: white;
+    }
+    #next-btn {
+        display: none;
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+    }
+    #next-btn:hover {
+        background-color: #0056b3;
+    }
+    #result {
+        font-weight: bold;
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    #legend {
+        width: 80%;
+        height: 70px;
+        margin-top: 20px;
+    }
+    #progress {
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #888;
+    }
+    h1, h2 {
+        color: #007bff;
+    }
+    #country {
+        color: #ffc107;
+    }
+    #newsflash {
+        background-color: #3a3a3a;
+        border-left: 5px solid #ffc107;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    #newsflash h3 {
+        color: #ffc107;
+        margin-top: 0;
+    }
+    #newsflash .source {
+        font-style: italic;
+        color: #888;
+        text-align: right;
+        margin-top: 10px;
+    }
+    #particles-js {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+    #globe {
+        position: relative;
+        z-index: 2;
+    }
+    #hologram-base {
+        width: 200px;
+        height: 20px;
+        background: radial-gradient(ellipse at center, #007bff 0%, transparent 70%);
+        position: absolute;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        filter: blur(5px);
+        opacity: 0.7;
+        z-index: 1;
+    }
+</style>
+</head>
+<body>
+<div id="quiz-container">
+    <h1>Global Ethics & Compliance Quiz</h1>
+    <h2>Navigating Corruption for Uber</h2>
+    <div id="progress"></div>
+    <div id="newsflash"></div>
+    <h3 id="country"></h3>
+    <p id="scenario"></p>
+    <p id="question"></p>
+    <div id="choices"></div>
+    <p id="result"></p>
+    <button id="next-btn">Next Question</button>
+</div>
+<div id="globe-container">
+    <div id="particles-js"></div>
+    <div id="globe"></div>
+    <div id="hologram-base"></div>
+    <div id="legend"></div>
+</div>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+const width = window.innerWidth / 3;
+const height = window.innerHeight - 70;
+const sensitivity = 75;
+
+let projection = d3.geoOrthographic()
+    .scale(Math.min(width, height) / 2 - 10)
+    .center([0, 0])
+    .rotate([0, -30])
+    .translate([width / 2, height / 2]);
+
+const initialScale = projection.scale();
+let path = d3.geoPath().projection(projection);
+
+let svg = d3.select("#globe").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+let globe = svg.append("circle")
+    .attr("fill", "#1c1c1c")
+    .attr("stroke", "#007bff")
+    .attr("stroke-width", "0.2")
+    .attr("cx", width/2)
+    .attr("cy", height/2)
+    .attr("r", initialScale);
+
+svg.call(d3.drag().on('drag', () => {
+    const rotate = projection.rotate();
+    const k = sensitivity / projection.scale();
+    projection.rotate([
+        rotate[0] + d3.event.dx * k,
+        rotate[1] - d3.event.dy * k
+    ]);
+    path = d3.geoPath().projection(projection);
+    svg.selectAll("path").attr("d", path);
+}))
+.call(d3.zoom().on('zoom', () => {
+    if(d3.event.transform.k > 0.3) {
+        projection.scale(initialScale * d3.event.transform.k);
+        path = d3.geoPath().projection(projection);
+        svg.selectAll("path").attr("d", path);
+        globe.attr("r", projection.scale());
+    }
+    else {
+        d3.event.transform.k = 0.3;
+    }
+}));
+
+let map = svg.append("g");
+
+const colorScale = d3.scaleLinear()
+    .domain([0, 50, 100])
+    .range(["#dc3545", "#ffc107", "#28a745"]);
+
+let countries;
+
+d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+    .then(function(data) {
+        countries = topojson.feature(data, data.objects.countries).features;
+
+        const cpiData = {
+            "Nigeria": 24,
+            "Brazil": 38,
+            "India": 40,
+            "Mexico": 31,
+            "Indonesia": 37,
+            "Turkey": 36
+        };
+
+        map.selectAll("path")
+            .data(countries)
+            .enter().append("path")
+            .attr("class", "country")
+            .attr("d", path)
+            .attr("fill", function(d) {
+                const cpiScore = cpiData[d.properties.name];
+                return cpiScore ? colorScale(cpiScore) : "#4a4a4a";
+            })
+            .attr("stroke", "#1a1a1a")
+            .attr("stroke-width", 0.5);
+
+        const legendWidth = width * 0.8;
+        const legendHeight = 20;
+
+        const legendSvg = d3.select("#legend")
+            .append("svg")
+            .attr("width", legendWidth)
+            .attr("height", legendHeight + 40);
+
+        const defs = legendSvg.append("defs");
+
+        const linearGradient = defs.append("linearGradient")
+            .attr("id", "linear-gradient");
+
+        linearGradient.selectAll("stop")
+            .data(colorScale.range())
+            .enter().append("stop")
+            .attr("offset", (d, i) => i / (colorScale.range().length - 1))
+            .attr("stop-color", d => d);
+
+        legendSvg.append("rect")
+            .attr("width", legendWidth)
+            .attr("height", legendHeight)
+            .style("fill", "url(#linear-gradient)");
+
+        const legendScale = d3.scaleLinear()
+            .domain([0, 100])
+            .range([0, legendWidth]);
+
+        const legendAxis = d3.axisBottom(legendScale)
+            .tickValues([0, 50, 100])
+            .tickFormat(d => d);
+
+        legendSvg.append("g")
+            .attr("transform", `translate(0, ${legendHeight})`)
+            .call(legendAxis)
+            .selectAll("text")
+            .style("fill", "#e0e0e0");
+
+        legendSvg.append("text")
+            .attr("x", legendWidth / 2)
+            .attr("y", legendHeight + 35)
+            .attr("text-anchor", "middle")
+            .style("fill", "#e0e0e0")
+            .text("Corruption Perceptions Index (CPI) Score");
+
+        startQuiz();
+    });
+
+// Particle.js configuration
+particlesJS('particles-js', {
+  "particles": {
+    "number": {
+      "value": 80,
+      "density": {
+        "enable": true,
+        "value_area": 800
+      }
+    },
+    "color": {
+      "value": "#007bff"
+    },
+    "shape": {
+      "type": "circle",
+      "stroke": {
+        "width": 0,
+        "color": "#000000"
+      },
+      "polygon": {
+        "nb_sides": 5
+      }
+    },
+    "opacity": {
+      "value": 0.5,
+      "random": false,
+      "anim": {
+        "enable": false,
+        "speed": 1,
+        "opacity_min": 0.1,
+        "sync": false
+      }
+    },
+    "size": {
+      "value": 3,
+      "random": true,
+      "anim": {
+        "enable": false,
+        "speed": 40,
+        "size_min": 0.1,
+        "sync": false
+      }
+    },
+    "line_linked": {
+      "enable": true,
+      "distance": 150,
+      "color": "#007bff",
+      "opacity": 0.4,
+      "width": 1
+    },
+    "move": {
+      "enable": true,
+      "speed": 2,
+      "direction": "none",
+      "random": false,
+      "straight": false,
+      "out_mode": "out",
+      "bounce": false,
+      "attract": {
+        "enable": false,
+        "rotateX": 600,
+        "rotateY": 1200
+      }
+    }
+  },
+  "interactivity": {
+    "detect_on": "canvas",
+    "events": {
+      "onhover": {
+        "enable": true,
+        "mode": "repulse"
+      },
+      "onclick": {
+        "enable": true,
+        "mode": "push"
+      },
+      "resize": true
+    },
+    "modes": {
+      "grab": {
+        "distance": 400,
+        "line_linked": {
+          "opacity": 1
+        }
+      },
+      "bubble": {
+        "distance": 400,
+        "size": 40,
+        "duration": 2,
+        "opacity": 8,
+        "speed": 3
+      },
+      "repulse": {
+        "distance": 200,
+        "duration": 0.4
+      },
+      "push": {
+        "particles_nb": 4
+      },
+      "remove": {
+        "particles_nb": 2
+      }
+    }
+  },
+  "retina_detect": true
+});
+
+const quizData = [
+    {
+        country: "Nigeria",
+        scenario: "Uber is launching operations in Lagos, Nigeria. A local transport official suggests that for a 'smooth' launch, a 'facilitation fee' should be paid to expedite the necessary permits and licenses.",
+        question: "Given Nigeria's complex business environment, what should Uber's country manager do?",
+        choices: [
+            "Pay the fee to avoid delays, as it's common practice in the transport sector.",
+            "Politely decline and report the request to the company's compliance officer, emphasizing the need for transparent processes.",
+            "Negotiate the fee to a lower amount, arguing it's for the benefit of improving local transportation."
+        ],
+        correct: 1,
+        newsflash: "Nigerian authorities have launched a comprehensive anti-corruption drive in the transportation sector, targeting illegal fees and bribes in licensing and permit processes. The initiative aims to create a more transparent environment for both local and international businesses.",
+        source: "Nigerian Transportation Regulatory Commission"
+    },
+    {
+        country: "Brazil",
+        scenario: "During negotiations for operating licenses in São Paulo, a municipal representative suggests that securing swift approval might require a 'consulting fee' paid to a well-connected local transportation expert.",
+        question: "Given Brazil's recent anti-corruption efforts, what is the most ethical course of action for Uber's expansion team?",
+        choices: [
+            "Pay the consulting fee as part of the local business culture, but ensure it's properly documented.",
+            "Insist on a transparent and competitive licensing process, citing Brazil's new anti-corruption laws.",
+            "Agree to the fee but request to meet the transportation expert to ensure their legitimacy."
+        ],
+        correct: 1,
+        newsflash: "Brazil's Department of Transportation has implemented a new digital platform for ride-sharing license applications, aimed at increasing transparency and reducing corruption in the process. The move comes after a series of investigations into bribery in the urban mobility sector.",
+        source: "Folha de São Paulo"
+    },
+    {
+        country: "India",
+        scenario: "Uber is bidding for a government contract to provide ride-sharing services for a smart city project in India. A local consultant offers to provide inside information about competitors' bids and the evaluation criteria for a substantial fee.",
+        question: "Given India's 'Digital India' initiative and anti-corruption laws, what's the appropriate response from Uber's strategy team?",
+        choices: [
+            "Pay for the information to gain a competitive edge, as it's crucial for entering India's tech-driven transport market.",
+            "Decline the offer and report it to the compliance department, emphasizing commitment to fair competition in India's growing mobility sector.",
+            "Accept the offer but don't pay until you win the contract, ensuring you're not wasting resources."
+        ],
+        correct: 1,
+        newsflash: "India's Ministry of Urban Development has launched an investigation into alleged irregularities in the awarding of smart city mobility contracts. The probe aims to ensure transparency and fair competition in the rapidly growing ride-sharing market.",
+        source: "The Economic Times"
+    },
+    {
+        country: "Mexico",
+        scenario: "During a routine inspection of Uber's operations in Mexico City, a local inspector hints that overlooking minor regulatory violations would be possible for a 'small consideration', suggesting it's a common practice in the industry.",
+        question: "Considering Mexico's efforts to improve its transportation regulations, how should Uber's local team handle this situation?",
+        choices: [
+            "Pay the bribe to avoid potential issues with the inspection, as it might be an accepted industry practice.",
+            "Refuse and report the incident to local authorities and the company's ethics hotline, emphasizing commitment to regulatory compliance.",
+            "Negotiate to reduce the amount of the bribe while promising to fix the violations quickly."
+        ],
+        correct: 1,
+        newsflash: "Mexican authorities have launched a major anti-corruption operation targeting the ride-sharing industry. Several officials and company executives have been arrested in connection with a scheme involving bribes for overlooking regulatory violations.",
+        source: "El Universal"
+    },
+    {
+        country: "Indonesia",
+        scenario: "Uber needs to obtain permits quickly for a time-sensitive expansion into Bali's tourist-heavy ride-sharing market. A local consultant offers to speed up the process through their 'connections' in the regional transportation department.",
+        question: "Given Indonesia's decentralized governance and push for digital transformation in transportation, what action should Uber's expansion team take?",
+        choices: [
+            "Hire the consultant to expedite the process, as local connections are crucial for navigating Indonesia's regional bureaucracies.",
+            "Reject the offer and follow standard procedures, emphasizing the company's commitment to digital innovation and transparency in transportation.",
+            "Ask the consultant for more details about their methods before deciding, ensuring they align with ethical business practices."
+        ],
+        correct: 1,
+        newsflash: "Indonesia's Ministry of Transportation has unveiled a new online platform for ride-sharing permit applications, aimed at reducing corruption and streamlining the process for both local and international companies. The initiative is part of the country's broader efforts to digitize government services.",
+        source: "Jakarta Post"
+    },
+    {
+        country: "Turkey",
+        scenario: "Uber is expanding its driver network in Istanbul and discovers that a local partner might be using unregistered drivers to meet high demand. The partner offers a significant discount on their services to 'overlook' the issue, claiming it's helping unemployed individuals.",
+        question: "Considering Turkey's regulations on ride-sharing and employment laws, what's the correct course of action for Uber's operations team?",
+        choices: [
+            "Accept the discount but gradually phase out the partner, recognizing the complexity of the employment situation.",
+            "Immediately terminate the relationship and report the partner to authorities, upholding company standards and Turkish labor laws.",
+            "Work with the partner to properly register all drivers, ensuring compliance with Turkish labor laws and Uber's ethical standards."
+        ],
+        correct: 2,
+        newsflash: "Turkish authorities have intensified efforts to regulate the ride-sharing industry, with a focus on driver registration and labor law compliance. Recent operations have led to fines for companies using unregistered drivers, prompting calls for stricter enforcement and better protection for gig economy workers.",
+        source: "Hürriyet Daily News"
+    }
+];
+
+let shuffledQuizData = [...quizData];
+let currentQuestion = 0;
+let answerSelected = false;
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function startQuiz() {
+    shuffleArray(shuffledQuizData);
+    showQuestion();
+}
+
+function showQuestion() {
+    answerSelected = false;
+    const quiz = shuffledQuizData[currentQuestion];
+    document.getElementById('country').textContent = quiz.country;
+    document.getElementById('scenario').textContent = quiz.scenario;
+    document.getElementById('question').textContent = quiz.question;
+
+    const choicesContainer = document.getElementById('choices');
+    choicesContainer.innerHTML = '';
+    quiz.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.textContent = choice;
+        button.onclick = () => selectAnswer(index);
+        choicesContainer.appendChild(button);
+    });
+
+    document.getElementById('result').textContent = '';
+    document.getElementById('next-btn').style.display = 'none';
+
+    updateProgress();
+    showNewsflash(quiz.newsflash, quiz.source);
+    focusOnCountry(quiz.country);
+}
+
+function showNewsflash(newsContent, source) {
+    const newsflashElement = document.getElementById('newsflash');
+    newsflashElement.innerHTML = `
+        <h3>Breaking News</h3>
+        <p>${newsContent}</p>
+        <p class="source">Source: ${source}</p>
+    `;
+}
+
+function focusOnCountry(countryName) {
+    const country = countries.find(d => d.properties.name === countryName);
+    if (country) {
+        const [x, y] = path.centroid(country);
+        const [longitude, latitude] = projection.invert([x, y]);
+        const rotate = projection.rotate();
+
+        d3.transition()
+            .duration(1000)
+            .tween("rotate", () => {
+                const r = d3.interpolate(rotate, [-longitude, -latitude]);
+                return t => {
+                    projection.rotate(r(t));
+                    svg.selectAll("path").attr("d", path);
+                };
+            });
+    }
+}
+
+function selectAnswer(index) {
+    if (answerSelected) return;
+
+    answerSelected = true;
+    const quiz = shuffledQuizData[currentQuestion];
+    const buttons = document.querySelectorAll('#choices button');
+    const resultElement = document.getElementById('result');
+
+    buttons.forEach((button, i) => {
+        button.classList.remove('selected', 'correct', 'incorrect');
+        if (i === index) {
+            button.classList.add('selected');
+        }
+        if (i === quiz.correct) {
+            button.classList.add('correct');
+        } else if (i === index && i !== quiz.correct) {
+            button.classList.add('incorrect');
+        }
+    });
+
+    if (index === quiz.correct) {
+        resultElement.textContent = "Correct! Well done.";
+        resultElement.style.color = "#28a745";
+        changeCountryColor(quiz.country, "#00ff00"); // Bright green for correct
+    } else {
+        resultElement.textContent = "Incorrect. Please review the correct answer.";
+        resultElement.style.color = "#dc3545";
+        changeCountryColor(quiz.country, "#ff0000"); // Bright red for incorrect
+    }
+    document.getElementById('next-btn').style.display = 'block';
+}
+
+function changeCountryColor(countryName, color) {
+    svg.selectAll("path")
+        .filter(function(d) {
+            return d.properties.name === countryName;
+        })
+        .transition()
+        .duration(500)
+        .attr("fill", color);
+}
+
+function updateProgress() {
+    const progressElement = document.getElementById('progress');
+    progressElement.textContent = `Question ${currentQuestion + 1} of ${shuffledQuizData.length}`;
+}
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    currentQuestion++;
+    if (currentQuestion < shuffledQuizData.length) {
+        showQuestion();
+    } else {
+        document.getElementById('quiz-container').innerHTML = `
+            <h1>Quiz Completed!</h1>
+            <p>Congratulations on completing the Global Ethics & Compliance Quiz for Uber! You've navigated through various challenging scenarios across different countries, each with its unique cultural and economic context in the ride-sharing industry.</p>
+            <p>Remember, maintaining ethical standards and avoiding corruption is crucial in international business expansion, regardless of local practices or pressures. Always prioritize transparency, follow your company's ethical guidelines, and don't hesitate to seek guidance from your compliance team when facing uncertain situations.</p>
+            <p>Your commitment to ethical practices contributes to building a more fair and sustainable global ride-sharing ecosystem, respecting local laws and international standards while promoting innovation in urban mobility.</p>
+            <p>Well done!</p>
+        `;
+    }
+});
+</script>
+</body>
+</html>
